@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Habit Tracker</title>
+
+<style>
+
+body{
+margin:0;
+font-family:sans-serif;
+background:#f3f4f6;
+}
+
+.header{
+background:#4CAF50;
+color:white;
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+}
+
+.container{
+padding:15px;
+}
+
+.card{
+background:white;
+border-radius:12px;
+padding:15px;
+margin-bottom:15px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.habit{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+.days{
+display:flex;
+gap:6px;
+}
+
+.days input{
+width:18px;
+height:18px;
+}
+
+.progress-title{
+margin-bottom:8px;
+}
+
+.progress-bg{
+background:#ddd;
+height:14px;
+border-radius:10px;
+}
+
+.progress-bar{
+height:14px;
+width:0%;
+background:#4CAF50;
+border-radius:10px;
+}
+
+.streak{
+margin-top:10px;
+font-weight:bold;
+}
+
+img{
+width:100%;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+canvas{
+width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+Habit Tracker
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600">
+
+</div>
+
+<div class="card">
+
+<div class="progress-title">
+Progress Mingguan
+</div>
+
+<div class="progress-bg">
+<div class="progress-bar" id="bar"></div>
+</div>
+
+<div class="streak">
+🔥 Streak: <span id="streak">0</span>
+</div>
+
+</div>
+
+<div class="card" id="habitList">
+
+</div>
+
+<div class="card">
+
+<canvas id="chart" height="150"></canvas>
+
+</div>
+
+</div>
+
+<script>
+
+const habits=[
+"Bangun pagi",
+"Mandi",
+"Rapihin kamar",
+"Sarapan",
+"Latihan gitar",
+"Baca buku",
+"Belajar"
+]
+
+const habitList=document.getElementById("habitList")
+
+habits.forEach((habit,i)=>{
+
+let div=document.createElement("div")
+div.className="habit"
+
+let html="<div>"+habit+"</div>"
+
+html+="<div class='days'>"
+
+for(let d=0;d<7;d++){
+
+let key="h_"+i+"_"+d
+let checked=localStorage.getItem(key)=="1"
+
+html+=`<input type="checkbox" ${checked?"checked":""} onchange="save(${i},${d},this)">`
+
+}
+
+html+="</div>"
+
+div.innerHTML=html
+
+habitList.appendChild(div)
+
+})
+
+function save(i,d,el){
+
+localStorage.setItem("h_"+i+"_"+d,el.checked?"1":"0")
+
+update()
+
+}
+
+function update(){
+
+let total=habits.length*7
+let done=0
+
+for(let i=0;i<habits.length;i++){
+
+for(let d=0;d<7;d++){
+
+if(localStorage.getItem("h_"+i+"_"+d)=="1") done++
+
+}
+
+}
+
+let percent=(done/total)*100
+
+document.getElementById("bar").style.width=percent+"%"
+
+document.getElementById("streak").textContent=done
+
+drawChart()
+
+}
+
+function drawChart(){
+
+let canvas=document.getElementById("chart")
+let ctx=canvas.getContext("2d")
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+let days=[0,0,0,0,0,0,0]
+
+for(let i=0;i<habits.length;i++){
+
+for(let d=0;d<7;d++){
+
+if(localStorage.getItem("h_"+i+"_"+d)=="1") days[d]++
+
+}
+
+}
+
+days.forEach((v,i)=>{
+
+let h=v*10
+
+ctx.fillStyle="#4CAF50"
+
+ctx.fillRect(i*45+20,140-h,25,h)
+
+})
+
+}
+
+update()
+
+</script>
+
+</body>
+</html>
